@@ -30,7 +30,7 @@ global
 	float happiness_reduction_per_car_use<-0.00016;
 	float increase_happiness_reduction_per_car_use<-0;
 	
-	int REDUCTION <- small_model? 6:1;
+	int REDUCTION <- small_model? 12:1;
 	file shape_file_buildings <- file("../includes/CAD_BATIMENT_HORSOL.shp");
 	file shape_file_roads <- file("../includes/GMO_GRAPHE_ROUTIER.shp");
 	file shape_file_lignes <- file("../includes/TPG_LIGNES.shp");
@@ -106,6 +106,8 @@ global
     int bikers<-0;
     int TPG_users<-0;
     int car_users<-0;
+    
+    int tax_impact_on_relocation<-50;
     
     int nb_people->{length(person)};
     
@@ -2102,7 +2104,7 @@ species person skills: [moving]
     	tax_sum<-tax_sum+total_tax;
     	float happiness_diminish <- commuting_time > 30#mn or
     	(tmp_transport_time>20#mn
-    	and total_tax > 50)? 0.5:0;
+    	and total_tax > tax_impact_on_relocation)? 0.5:0;
     	happiness <- 1-happiness_diminish-min(total_tax/200, 0.5);
     	happiness <- (prev_car_used=0 and happiness_diminish=0)?min(1,happiness+0.5):happiness;
     	//happiness<-calculate_new_happiness();
@@ -2225,6 +2227,7 @@ grid city_cells neighbors: 4 cell_height: 1000 #m cell_width: 1000 #m
 experiment gen_traffic type: gui 
 {
 	parameter "Small model" var: small_model category: "Model";
+	parameter "Granulation" var: REDUCTION min:1 max:100 category: "Model";
 	parameter "Beautiful display" var: beautiful_display category: "Model";
 	parameter "Daily relocations (full city)" var: daily_relocations min: 0 max: 1000 category: "Model";
 	parameter "Daily population growth (full city)" var: population_growth min: 0 max: 1000 category: "Model";
@@ -2236,6 +2239,7 @@ experiment gen_traffic type: gui
 	parameter "Tax increment for gas cars" var: gas_tax_increment min:0 max: 0.00005 category: "Taxes";
 	parameter "Tax increment for diesel cars" var: diesel_tax_increment min:0 max: 0.00005 category: "Taxes";
 	parameter "Tax increment for electric cars" var: electric_tax_increment min:0 max: 0.00005 category: "Taxes";
+	parameter "Tax impact on relocations (400 - almost no impact, 1 - huge impact)" var: tax_impact_on_relocation min:1 max: 400 category: "Taxes";
 	
 	parameter "Shapefile for the buildings:" var: shape_file_buildings category: "GIS" ;
 	parameter "Shapefile for the roads:" var: shape_file_roads category: "GIS" ;
@@ -2260,14 +2264,14 @@ experiment gen_traffic type: gui
 	output {
 		display city_display type:3d antialias: true
 		{
-			//grid city_cells lines: #black;
+			grid city_cells lines: #black;
 			//species perim aspect: base;
 			//species building aspect: base;
-			//species road aspect: base;
-			//species ligne aspect: base;
-			//species stop aspect: base;
-			//species tram18 aspect:base;
-			//species person aspect: not_breaking;			
+			species road aspect: base;
+			species ligne aspect: base;
+			species stop aspect: base;
+			species tram18 aspect:base;
+			species person aspect: not_breaking;			
 		}
 		monitor "Number of cars" value: cars;
 		monitor "Day: " value: nb_days;
