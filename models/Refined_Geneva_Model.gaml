@@ -82,7 +82,7 @@ global
     float electric_emissions_rate <- 0.053 #kg/#km;
     
     //https://www.bfs.admin.ch/bfs/en/home/statistics/regional-statistics/regional-portraits-key-figures/cantons/geneva.html
-    float has_car_probability <- 1.0; //0.44 is per 1000 people but kids dont drive. I only work with adults 18-65. SCREW IT anybody can use a car.
+    float has_car_probability <- 1.0; //0.44 is per 1000 people but kids dont drive. I only work with adults 18-65. I do not want to calculate it => anybody can use a car.
     
     int cars <-0;
     int nb_days<-0;
@@ -868,6 +868,14 @@ global
 	{
 		step<-60#mn;
 	}
+	
+	/*
+	reflex stopsim when: "2040" in string(current_date)
+	{
+		do pause;
+	}
+	* 
+	*/
 	
 	reflex writedate when: not is_batch
 	{
@@ -1846,7 +1854,7 @@ species person skills: [moving]
     			morning_choice <-"WALK";
     			return "WALK";
     		}
-    		else if f <0.66+min(0.7, total_tax/5000)
+    		else if f <0.66+min(0.07, total_tax/5000)
     		{
     			morning_choice <-"BIKE";
     			return "BIKE";
@@ -2196,6 +2204,9 @@ species person skills: [moving]
     		}
     		else
     		{
+    			//DEMONSTRATION PURPOSES ONLY
+    			//return (car_used+2*distance)*(tax+tax_increase);
+    			
     			if mod(nb_days, 60)=days_for_car_usage[0]
     			{
     				days_for_car_usage>>days_for_car_usage[0];
